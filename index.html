@@ -1,0 +1,1062 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Crash Course - Interactive Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            border-radius: 25px;
+            padding: 3px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            height: 20px;
+            border-radius: 25px;
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .learning-modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .module {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .module:hover::before {
+            left: 100%;
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .module.completed {
+            border-left: 5px solid #4CAF50;
+        }
+
+        .module.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .module.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            opacity: 0.7;
+        }
+
+        .module.unlocked {
+            animation: unlockPulse 0.6s ease-out;
+        }
+
+        @keyframes unlockPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(76, 205, 196, 0.6); }
+            100% { transform: scale(1); }
+        }
+
+        .module-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .module h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .module p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .quiz-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+        }
+
+        .quiz-question {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .drag-drop-area {
+            min-height: 200px;
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            background: rgba(102, 126, 234, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drag-item {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .drag-item:hover {
+            transform: scale(1.05);
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+        }
+
+        .drop-zone {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.highlight {
+            background: rgba(76, 175, 80, 0.4);
+            border-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .mnemonic-box {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #e17055;
+        }
+
+        .mnemonic-box h4 {
+            color: #d63031;
+            margin-bottom: 10px;
+        }
+
+        .code-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .code-example .keyword {
+            color: #81c784;
+        }
+
+        .code-example .string {
+            color: #ffb74d;
+        }
+
+        .code-example .comment {
+            color: #90a4ae;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+            animation: celebrationPop 0.5s ease-out;
+        }
+
+        @keyframes celebrationPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .xp-gain {
+            position: absolute;
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: xpFloat 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes xpFloat {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .learning-modules {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐍 Python Crash Course</h1>
+            <p>Master Python with Interactive Learning & Memory Hacks</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill">
+                <div class="progress-text" id="progressText">0% Complete</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h3>📊 Learning Progress</h3>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number" id="completedModules">0</div>
+                        <div class="stat-label">Modules</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="totalXP">0</div>
+                        <div class="stat-label">XP Earned</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Current Streak</h3>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number" id="currentStreak">0</div>
+                        <div class="stat-label">Days</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="bestStreak">0</div>
+                        <div class="stat-label">Best</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🏆 Achievements</h3>
+                <div id="achievements">
+                    <p>Complete modules to unlock achievements!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="learning-modules" id="learningModules">
+            <!-- Modules will be populated by JavaScript -->
+        </div>
+
+        <div class="quiz-container hidden" id="quizContainer">
+            <h3>🧠 Interactive Quiz</h3>
+            <div class="quiz-question" id="quizQuestion"></div>
+            <div class="drag-drop-area" id="dragDropArea">
+                <p>Drag and drop the correct answers!</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="checkQuiz()">Check Answers</button>
+                <button class="btn" onclick="nextQuiz()">Next Question</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Learning Data with Psychological Principles
+        const learningData = {
+            modules: [
+                {
+                    id: 1,
+                    title: "Python Basics",
+                    description: "Variables, data types, and print statements",
+                    icon: "🔤",
+                    content: {
+                        concepts: [
+                            "Variables store data",
+                            "Strings are text",
+                            "Numbers can be integers or floats",
+                            "Print displays output"
+                        ],
+                        mnemonic: "VSPN: Variables Store, Print Numbers",
+                        codeExample: `# Variables store data
+name = "Python"        # String
+age = 25              # Integer
+height = 1.75         # Float
+print("Hello", name)  # Print output`,
+                        quiz: {
+                            question: "Drag the correct data types to match the values:",
+                            items: [
+                                { text: "String", correct: "name" },
+                                { text: "Integer", correct: "age" },
+                                { text: "Float", correct: "height" }
+                            ],
+                            answers: [
+                                { value: "name", label: "name = \"Python\"" },
+                                { value: "age", label: "age = 25" },
+                                { value: "height", label: "height = 1.75" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: 2,
+                    title: "Control Flow",
+                    description: "If statements, loops, and decision making",
+                    icon: "🔄",
+                    content: {
+                        concepts: [
+                            "If statements make decisions",
+                            "Loops repeat code",
+                            "Indentation is crucial",
+                            "Use elif for multiple conditions"
+                        ],
+                        mnemonic: "ILIU: If Loops Indent Use",
+                        codeExample: `# Control flow examples
+age = 18
+if age >= 18:
+    print("Adult")
+elif age >= 13:
+    print("Teenager")
+else:
+    print("Child")
+
+# Loop example
+for i in range(5):
+    print(f"Count: {i}")`,
+                        quiz: {
+                            question: "Match the control flow concepts:",
+                            items: [
+                                { text: "Decision Making", correct: "if" },
+                                { text: "Repetition", correct: "for" },
+                                { text: "Multiple Conditions", correct: "elif" }
+                            ],
+                            answers: [
+                                { value: "if", label: "if age >= 18:" },
+                                { value: "for", label: "for i in range(5):" },
+                                { value: "elif", label: "elif age >= 13:" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: 3,
+                    title: "Functions",
+                    description: "Creating reusable code blocks",
+                    icon: "⚙️",
+                    content: {
+                        concepts: [
+                            "Functions are reusable blocks",
+                            "Parameters pass data in",
+                            "Return sends data back",
+                            "Docstrings explain purpose"
+                        ],
+                        mnemonic: "FPRD: Functions Parameters Return Docstrings",
+                        codeExample: `def greet(name):
+    """Greet a person by name"""
+    message = f"Hello, {name}!"
+    return message
+
+# Call the function
+result = greet("Alice")
+print(result)  # Output: Hello, Alice!`,
+                        quiz: {
+                            question: "Drag the function components:",
+                            items: [
+                                { text: "Function Definition", correct: "def" },
+                                { text: "Parameter", correct: "name" },
+                                { text: "Return Statement", correct: "return" }
+                            ],
+                            answers: [
+                                { value: "def", label: "def greet(name):" },
+                                { value: "name", label: "name parameter" },
+                                { value: "return", label: "return message" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: 4,
+                    title: "Data Structures",
+                    description: "Lists, dictionaries, and collections",
+                    icon: "📚",
+                    content: {
+                        concepts: [
+                            "Lists store ordered items",
+                            "Dictionaries use key-value pairs",
+                            "Tuples are immutable",
+                            "Sets have unique elements"
+                        ],
+                        mnemonic: "LDTS: Lists Dictionaries Tuples Sets",
+                        codeExample: `# Lists - ordered, changeable
+fruits = ["apple", "banana", "cherry"]
+fruits.append("orange")
+
+# Dictionaries - key-value pairs
+person = {
+    "name": "John",
+    "age": 30,
+    "city": "New York"
+}
+
+# Tuples - immutable
+coordinates = (10, 20)
+
+# Sets - unique elements
+unique_numbers = {1, 2, 3, 3, 4}  # Result: {1, 2, 3, 4}`,
+                        quiz: {
+                            question: "Match the data structure types:",
+                            items: [
+                                { text: "Ordered Collection", correct: "list" },
+                                { text: "Key-Value Pairs", correct: "dict" },
+                                { text: "Immutable", correct: "tuple" }
+                            ],
+                            answers: [
+                                { value: "list", label: "fruits = [\"apple\", \"banana\"]" },
+                                { value: "dict", label: "person = {\"name\": \"John\"}" },
+                                { value: "tuple", label: "coordinates = (10, 20)" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: 5,
+                    title: "Error Handling",
+                    description: "Try-catch blocks and debugging",
+                    icon: "🛡️",
+                    content: {
+                        concepts: [
+                            "Try blocks test code",
+                            "Except catches errors",
+                            "Finally always runs",
+                            "Raise creates errors"
+                        ],
+                        mnemonic: "TEFR: Try Except Finally Raise",
+                        codeExample: `try:
+    number = int(input("Enter a number: "))
+    result = 10 / number
+    print(f"Result: {result}")
+except ValueError:
+    print("Please enter a valid number")
+except ZeroDivisionError:
+    print("Cannot divide by zero")
+finally:
+    print("This always runs")`,
+                        quiz: {
+                            question: "Match the error handling concepts:",
+                            items: [
+                                { text: "Test Code", correct: "try" },
+                                { text: "Catch Errors", correct: "except" },
+                                { text: "Always Run", correct: "finally" }
+                            ],
+                            answers: [
+                                { value: "try", label: "try:" },
+                                { value: "except", label: "except ValueError:" },
+                                { value: "finally", label: "finally:" }
+                            ]
+                        }
+                    }
+                }
+            ]
+        };
+
+        // Game State
+        let gameState = {
+            completedModules: 0,
+            totalXP: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            unlockedModules: [1],
+            currentQuiz: null,
+            achievements: []
+        };
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const saved = localStorage.getItem('pythonCrashCourse');
+            if (saved) {
+                gameState = { ...gameState, ...JSON.parse(saved) };
+            }
+            updateDashboard();
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('pythonCrashCourse', JSON.stringify(gameState));
+        }
+
+        // Update dashboard display
+        function updateDashboard() {
+            document.getElementById('completedModules').textContent = gameState.completedModules;
+            document.getElementById('totalXP').textContent = gameState.totalXP;
+            document.getElementById('currentStreak').textContent = gameState.currentStreak;
+            document.getElementById('bestStreak').textContent = gameState.bestStreak;
+            
+            const progress = (gameState.completedModules / learningData.modules.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '% Complete';
+        }
+
+        // Create learning modules
+        function createModules() {
+            const container = document.getElementById('learningModules');
+            container.innerHTML = '';
+
+            learningData.modules.forEach(module => {
+                const isUnlocked = gameState.unlockedModules.includes(module.id);
+                const isCompleted = gameState.completedModules >= module.id;
+                
+                const moduleElement = document.createElement('div');
+                const wasLocked = !gameState.unlockedModules.includes(module.id);
+                const isNewlyUnlocked = isUnlocked && wasLocked && !isCompleted;
+                
+                moduleElement.className = `module ${isCompleted ? 'completed' : ''} ${!isUnlocked ? 'locked' : ''} ${isNewlyUnlocked ? 'unlocked' : ''}`;
+                moduleElement.onclick = () => isUnlocked ? openModule(module) : null;
+                
+                let statusText = '';
+                if (isCompleted) {
+                    statusText = '<span style="color: #4CAF50; font-weight: bold;">✓ Completed</span>';
+                } else if (!isUnlocked) {
+                    statusText = '<span style="color: #ff6b6b; font-weight: bold;">🔒 Complete previous module to unlock</span>';
+                } else {
+                    statusText = '<span style="color: #4ecdc4; font-weight: bold;">📚 Ready to learn!</span>';
+                }
+                
+                moduleElement.innerHTML = `
+                    <div class="module-icon">${module.icon}</div>
+                    <h4>${module.title}</h4>
+                    <p>${module.description}</p>
+                    <div style="margin-top: 10px;">${statusText}</div>
+                `;
+                
+                container.appendChild(moduleElement);
+            });
+        }
+
+        // Open module content
+        function openModule(module) {
+            gameState.currentQuiz = module;
+            
+            // Hide modules and show quiz
+            document.getElementById('learningModules').classList.add('hidden');
+            document.getElementById('quizContainer').classList.remove('hidden');
+            
+            // Display module content
+            displayModuleContent(module);
+        }
+
+        // Display module content with dual coding
+        function displayModuleContent(module) {
+            const quizContainer = document.getElementById('quizContainer');
+            const content = module.content;
+            
+            quizContainer.innerHTML = `
+                <h3>${module.icon} ${module.title}</h3>
+                
+                <div class="mnemonic-box">
+                    <h4>🧠 Memory Hack</h4>
+                    <p><strong>${content.mnemonic}</strong> - ${content.mnemonic.split('').map((letter, i) => 
+                        content.concepts[i] ? `${letter} = ${content.concepts[i]}` : ''
+                    ).filter(Boolean).join(', ')}</p>
+                </div>
+                
+                <div class="code-example">
+                    <div class="keyword"># ${module.title} Example</div>
+                    ${content.codeExample.split('\n').map(line => {
+                        if (line.includes('def ') || line.includes('if ') || line.includes('for ') || line.includes('try:') || line.includes('except ') || line.includes('finally:')) {
+                            return `<div class="keyword">${line}</div>`;
+                        } else if (line.includes('"') || line.includes("'")) {
+                            return `<div class="string">${line}</div>`;
+                        } else if (line.includes('#')) {
+                            return `<div class="comment">${line}</div>`;
+                        } else {
+                            return `<div>${line}</div>`;
+                        }
+                    }).join('')}
+                </div>
+                
+                <div class="quiz-question">${content.quiz.question}</div>
+                
+                <div class="drag-drop-area" id="dragDropArea">
+                    <p>Drag the correct answers to the drop zones below!</p>
+                </div>
+                
+                <div id="dropZones" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0;">
+                    ${content.quiz.items.map(item => `
+                        <div class="drop-zone" data-correct="${item.correct}">
+                            <span style="color: #666;">${item.text}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="checkQuiz()">Check Answers</button>
+                    <button class="btn" onclick="backToModules()">Back to Modules</button>
+                </div>
+            `;
+            
+            // Create draggable items
+            createDraggableItems(content.quiz.answers);
+            setupDragAndDrop();
+        }
+
+        // Create draggable quiz items
+        function createDraggableItems(answers) {
+            const dragArea = document.getElementById('dragDropArea');
+            dragArea.innerHTML = '';
+            
+            answers.forEach(answer => {
+                const dragItem = document.createElement('div');
+                dragItem.className = 'drag-item';
+                dragItem.draggable = true;
+                dragItem.textContent = answer.label;
+                dragItem.dataset.value = answer.value;
+                dragArea.appendChild(dragItem);
+            });
+        }
+
+        // Setup drag and drop functionality
+        function setupDragAndDrop() {
+            const dragItems = document.querySelectorAll('.drag-item');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            dragItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        // Drag and drop event handlers
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.value);
+            e.target.style.opacity = '0.5';
+        }
+
+        function handleDragEnd(e) {
+            e.target.style.opacity = '1';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.target.classList.add('highlight');
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('highlight');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const draggedValue = e.dataTransfer.getData('text/plain');
+            const dropZone = e.target.closest('.drop-zone');
+            
+            if (dropZone) {
+                dropZone.classList.remove('highlight');
+                dropZone.dataset.dropped = draggedValue;
+                dropZone.innerHTML = `<span style="color: #4CAF50; font-weight: bold;">✓ ${draggedValue}</span>`;
+            }
+        }
+
+        // Check quiz answers
+        function checkQuiz() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let correctAnswers = 0;
+            
+            dropZones.forEach(zone => {
+                const correct = zone.dataset.correct;
+                const dropped = zone.dataset.dropped;
+                
+                if (correct === dropped) {
+                    correctAnswers++;
+                    zone.style.background = 'rgba(76, 175, 80, 0.3)';
+                    zone.style.borderColor = '#4CAF50';
+                } else {
+                    zone.style.background = 'rgba(244, 67, 54, 0.3)';
+                    zone.style.borderColor = '#f44336';
+                }
+            });
+            
+            const accuracy = (correctAnswers / dropZones.length) * 100;
+            
+            if (accuracy >= 80) {
+                completeModule();
+                const nextModuleId = gameState.currentQuiz.id + 1;
+                if (nextModuleId <= learningData.modules.length) {
+                    showCelebration('🎉 Module Completed!', `You got ${Math.round(accuracy)}% correct! The next module is now unlocked!`);
+                } else {
+                    showCelebration('🎉 All Modules Completed!', `Congratulations! You've mastered all the Python concepts!`);
+                }
+            } else {
+                showCelebration('📚 Keep Learning!', `You got ${Math.round(accuracy)}% correct. Try again!`);
+            }
+        }
+
+        // Complete module and award XP
+        function completeModule() {
+            // Unlock the next module
+            const nextModuleId = gameState.currentQuiz.id + 1;
+            if (nextModuleId <= learningData.modules.length && !gameState.unlockedModules.includes(nextModuleId)) {
+                gameState.unlockedModules.push(nextModuleId);
+            }
+            
+            if (gameState.completedModules < gameState.currentQuiz.id) {
+                gameState.completedModules = gameState.currentQuiz.id;
+                gameState.totalXP += 100;
+                gameState.currentStreak++;
+                
+                if (gameState.currentStreak > gameState.bestStreak) {
+                    gameState.bestStreak = gameState.currentStreak;
+                }
+                
+                // Check for achievements
+                checkAchievements();
+                
+                saveGameState();
+                updateDashboard();
+                
+                // Refresh the modules display to show unlocked status
+                createModules();
+            }
+        }
+
+        // Check and award achievements
+        function checkAchievements() {
+            const newAchievements = [];
+            
+            if (gameState.completedModules === 1 && !gameState.achievements.includes('First Steps')) {
+                newAchievements.push('First Steps');
+                gameState.totalXP += 50;
+            }
+            
+            if (gameState.completedModules === 3 && !gameState.achievements.includes('Halfway There')) {
+                newAchievements.push('Halfway There');
+                gameState.totalXP += 100;
+            }
+            
+            if (gameState.completedModules === 5 && !gameState.achievements.includes('Python Master')) {
+                newAchievements.push('Python Master');
+                gameState.totalXP += 200;
+            }
+            
+            if (gameState.currentStreak === 3 && !gameState.achievements.includes('Streak Master')) {
+                newAchievements.push('Streak Master');
+                gameState.totalXP += 75;
+            }
+            
+            if (newAchievements.length > 0) {
+                showAchievements(newAchievements);
+            }
+        }
+
+        // Show achievements
+        function showAchievements(achievements) {
+            const achievementsDiv = document.getElementById('achievements');
+            achievements.forEach(achievement => {
+                gameState.achievements.push(achievement);
+                const achievementElement = document.createElement('div');
+                achievementElement.style.cssText = 'background: linear-gradient(135deg, #ffd700, #ffed4e); padding: 10px; border-radius: 8px; margin: 5px 0; text-align: center; font-weight: bold; color: #333;';
+                achievementElement.textContent = `🏆 ${achievement}`;
+                achievementsDiv.appendChild(achievementElement);
+            });
+        }
+
+        // Show celebration message
+        function showCelebration(title, message) {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerHTML = `
+                <h3>${title}</h3>
+                <p>${message}</p>
+                <button class="btn btn-success" onclick="this.parentElement.remove()">Continue</button>
+            `;
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                if (celebration.parentElement) {
+                    celebration.remove();
+                }
+            }, 5000);
+        }
+
+        // Back to modules
+        function backToModules() {
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('learningModules').classList.remove('hidden');
+            
+            // Refresh modules to show any newly unlocked ones
+            createModules();
+            
+            // Show a helpful message if new modules were unlocked
+            if (gameState.unlockedModules.length > 1) {
+                const unlockedCount = gameState.unlockedModules.length - 1;
+                if (unlockedCount === 1) {
+                    showCelebration('🎉 New Module Unlocked!', 'You can now access the next learning module!');
+                }
+            }
+        }
+
+        // Next quiz (placeholder for future expansion)
+        function nextQuiz() {
+            // Could implement more questions or move to next module
+            showCelebration('🚀 Coming Soon!', 'More interactive quizzes are on the way!');
+        }
+
+        // Initialize the app
+        function init() {
+            loadGameState();
+            createModules();
+            
+            // Add some initial achievements display
+            if (gameState.achievements.length > 0) {
+                gameState.achievements.forEach(achievement => {
+                    const achievementsDiv = document.getElementById('achievements');
+                    const achievementElement = document.createElement('div');
+                    achievementElement.style.cssText = 'background: linear-gradient(135deg, #ffd700, #ffed4e); padding: 10px; border-radius: 8px; margin: 5px 0; text-align: center; font-weight: bold; color: #333;';
+                    achievementElement.textContent = `🏆 ${achievement}`;
+                    achievementsDiv.appendChild(achievementElement);
+                });
+            }
+        }
+
+        // Debug function to check module status
+        function debugModuleStatus() {
+            console.log('🔍 Module Status Debug:');
+            console.log('Completed Modules:', gameState.completedModules);
+            console.log('Unlocked Modules:', gameState.unlockedModules);
+            console.log('Current Quiz:', gameState.currentQuiz);
+            
+            learningData.modules.forEach(module => {
+                const isUnlocked = gameState.unlockedModules.includes(module.id);
+                const isCompleted = gameState.completedModules >= module.id;
+                console.log(`Module ${module.id} (${module.title}): Unlocked=${isUnlocked}, Completed=${isCompleted}`);
+            });
+        }
+
+        // Start the app when page loads
+        window.addEventListener('load', init);
+        
+        // Make debug function available globally for troubleshooting
+        window.debugModuleStatus = debugModuleStatus;
+    </script>
+</body>
+</html>
