@@ -416,6 +416,12 @@
                 <div class="progress-text" id="progressText">0% Complete</div>
             </div>
         </div>
+        
+        <div style="text-align: center; margin: 10px 0;">
+            <small style="color: rgba(255,255,255,0.8);" id="saveStatus">
+                💾 Progress auto-saves every 30 seconds
+            </small>
+        </div>
 
         <div class="dashboard">
             <div class="card">
@@ -450,6 +456,21 @@
                 <h3>🏆 Achievements</h3>
                 <div id="achievements">
                     <p>Complete modules to unlock achievements!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💾 Progress Management</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="exportProgress()" style="font-size: 0.9rem; padding: 8px 16px;">
+                        📤 Export Progress
+                    </button>
+                    <button class="btn btn-secondary" onclick="importProgress()" style="font-size: 0.9rem; padding: 8px 16px;">
+                        📥 Import Progress
+                    </button>
+                    <button class="btn" onclick="resetProgress()" style="font-size: 0.9rem; padding: 8px 16px; background: linear-gradient(135deg, #ff6b6b, #ee5a52);">
+                        🔄 Reset Progress
+                    </button>
                 </div>
             </div>
         </div>
@@ -682,16 +703,156 @@ finally:
 
         // Load game state from localStorage
         function loadGameState() {
-            const saved = localStorage.getItem('pythonCrashCourse');
+            let saved = localStorage.getItem('pythonCrashCourse');
+            
+            // If localStorage fails, try sessionStorage as backup
+            if (!saved) {
+                saved = sessionStorage.getItem('pythonCrashCourse');
+                if (saved) {
+                    console.log('🔄 Loading from sessionStorage backup');
+                }
+            }
+            
             if (saved) {
-                gameState = { ...gameState, ...JSON.parse(saved) };
+                try {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                    console.log('✅ Progress loaded successfully');
+                    
+                    // If we loaded from sessionStorage, try to save back to localStorage
+                    if (saved === sessionStorage.getItem('pythonCrashCourse')) {
+                        try {
+                            localStorage.setItem('pythonCrashCourse', saved);
+                            console.log('💾 Progress restored to localStorage');
+                        } catch (error) {
+                            console.warn('⚠️ Could not restore to localStorage, keeping in sessionStorage');
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading progress:', error);
+                    // Try to recover from sessionStorage if localStorage was corrupted
+                    const sessionSaved = sessionStorage.getItem('pythonCrashCourse');
+                    if (sessionSaved && sessionSaved !== saved) {
+                        try {
+                            const parsed = JSON.parse(sessionSaved);
+                            gameState = { ...gameState, ...parsed };
+                            console.log('🔄 Recovered from sessionStorage backup');
+                        } catch (backupError) {
+                            console.error('❌ Backup also corrupted, resetting progress');
+                            resetProgress();
+                        }
+                    } else {
+                        resetProgress();
+                    }
+                }
+            } else {
+                console.log('🆕 First time user - starting fresh');
             }
             updateDashboard();
         }
 
         // Save game state to localStorage
         function saveGameState() {
-            localStorage.setItem('pythonCrashCourse', JSON.stringify(gameState));
+            try {
+                localStorage.setItem('pythonCrashCourse', JSON.stringify(gameState));
+                console.log('💾 Progress saved successfully');
+                
+                // Also save to sessionStorage for extra safety
+                sessionStorage.setItem('pythonCrashCourse', JSON.stringify(gameState));
+                
+                // Update save status
+                updateSaveStatus('✅ Progress saved successfully');
+            } catch (error) {
+                console.error('❌ Error saving progress:', error);
+                updateSaveStatus('❌ Save failed - try clearing browser data');
+                showCelebration('⚠️ Warning', 'Could not save progress. Try clearing some browser data.');
+            }
+        }
+
+        // Update save status display
+        function updateSaveStatus(message) {
+            const saveStatus = document.getElementById('saveStatus');
+            if (saveStatus) {
+                saveStatus.textContent = message;
+                saveStatus.style.color = message.includes('✅') ? 'rgba(76, 175, 80, 0.9)' : 
+                                       message.includes('❌') ? 'rgba(244, 67, 54, 0.9)' : 
+                                       'rgba(255,255,255,0.8)';
+                
+                // Reset to default message after 3 seconds
+                setTimeout(() => {
+                    saveStatus.textContent = '💾 Progress auto-saves every 30 seconds';
+                    saveStatus.style.color = 'rgba(255,255,255,0.8)';
+                }, 3000);
+            }
+        }
+
+        // Auto-save progress every 30 seconds
+        function setupAutoSave() {
+            setInterval(() => {
+                if (gameState.completedModules > 0 || gameState.totalXP > 0) {
+                    saveGameState();
+                }
+            }, 30000); // 30 seconds
+        }
+
+        // Reset progress (for testing or if user wants to start over)
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                gameState = {
+                    completedModules: 0,
+                    totalXP: 0,
+                    currentStreak: 0,
+                    bestStreak: 0,
+                    unlockedModules: [1],
+                    currentQuiz: null,
+                    achievements: []
+                };
+                localStorage.removeItem('pythonCrashCourse');
+                sessionStorage.removeItem('pythonCrashCourse');
+                updateDashboard();
+                createModules();
+                showCelebration('🔄 Progress Reset', 'All progress has been reset. Start fresh!');
+            }
+        }
+
+        // Export progress (for backup)
+        function exportProgress() {
+            const dataStr = JSON.stringify(gameState, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'python-crash-course-progress.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            showCelebration('📤 Progress Exported', 'Your progress has been saved to a file!');
+        }
+
+        // Import progress (for restore)
+        function importProgress() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const imported = JSON.parse(e.target.result);
+                            gameState = { ...gameState, ...imported };
+                            saveGameState();
+                            updateDashboard();
+                            createModules();
+                            showCelebration('📥 Progress Imported', 'Your progress has been restored!');
+                        } catch (error) {
+                            showCelebration('❌ Import Failed', 'Invalid progress file. Please try again.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
         }
 
         // Update dashboard display
@@ -1025,6 +1186,7 @@ finally:
         function init() {
             loadGameState();
             createModules();
+            setupAutoSave(); // Enable automatic saving
             
             // Add some initial achievements display
             if (gameState.achievements.length > 0) {
